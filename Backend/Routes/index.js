@@ -1,6 +1,6 @@
 import  express  from "express";
 import taskRouter from "./tasks.js"
-import authRouter from "./tasks.js"
+import authRouter from "./auth.js"
 import userRouter from "./user.js"
 
 const router = express.Router();
