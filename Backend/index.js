@@ -1,38 +1,42 @@
-import  express  from "express";
-import cors from "cors"
-import mongoose from "mongoose";
-import morgan from "morgan";
-import "dotenv/config"
-import cookieParser from "cookie-parser";
-import allRoutes from "./Routes/index.js"
+import express from 'express';
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import allRoutes from './routes/index.js';
 
-const PORT = process.env.PORT || 4000;
 const app = express();
+const PORT = process.env.PORT || 8000;
 
-
-//middleware
+// middleware
 app.use(cors());
-app.use(morgan("tiny"));
+app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
 
+// routes
+app.use('/api', allRoutes);
 
+// error handler
+// eslint-disable-next-line
+app.use((err, req, res, next) => {
+  const status = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  return res.status(status).json({ message, stack: err.stack });
+});
 
-//Routes
-app.use("/api",allRoutes)
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.DB_CONNECTION_STRING);
+    console.log('MongoDB Connected');
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+};
 
-
-const connectDB = async () =>{
-    try {
-        await mongoose.connect(process.env.MONGO_URL);
-        console.log("mongodb connected");
-    } catch(error){
-        console.log(error);
-        process.exit(1);
-    }     
-}
-
-app.listen(PORT , ()=>{
-    connectDB()
-    console.log(`server is running ${PORT}`);
-})
+app.listen(PORT, () => {
+  connectDB();
+  console.log(`Server is running on port ${PORT}`);
+});
